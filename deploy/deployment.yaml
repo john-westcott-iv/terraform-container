@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    description: test-image Quarkus Native Deployment Configuration.
+  labels:
+    app: test-image
+  name: test-image
+spec:
+  replicas: 0
+  selector:
+    matchLabels:
+      app: test-image
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: test-image
+      name: test-image
+    spec:
+      initContainers: []
+      containers: 
+      - image: 'image-registry.openshift-image-registry.svc:5000/test-namespace/test-image:latest'
+        imagePullPolicy: Always
+        name: test-image
+        ports:
+        - containerPort: 22
+          name: ssh
+          protocol: TCP
+        volumeMounts:
+        - name: postgresql-volume
+          mountPath: /var/lib/pgsql
+        - name: terraform-config-map
+          mountPath: /tmp/terraform-config
+        resources:
+          limits:
+            memory: "512Mi"
+            cpu: "1"
+          requests:
+            cpu: "100m"
+            memory: "512Mi"
+      terminationGracePeriodSeconds: 75
+      volumes:
+      - name: postgresql-volume
+        emptyDir: {}
+      - name: terraform-config-map
+        configMap:
+          name: terrafrom-config-cm
