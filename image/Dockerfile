@@ -1,37 +1,36 @@
 FROM centos:8
 
-# Create postgres user
-RUN groupadd -g 26 postgres
-RUN useradd -u 26 -g postgres -d /var/lib/pgsql -s /sbin/nologin postgres
-RUN mkdir -p /var/lib/pgsql/data
+# Install the MS repo file
+COPY azure-cli.repo /etc/yum.repos.d/azure-cli.repo
+# Install sudoers
 COPY sudoers_postgres /etc/sudoers.d/postgres
 
-# Create terraform user
-RUN groupadd -g 1001 terraform
-RUN useradd -u 1001 -g terraform -d /home/terraform -s /usr/bin/bash terraform
-RUN mkdir /home/terraform/.ssh /home/terraform/bin /home/terraform/terraform_scratch
-RUN curl -o /tmp/terraform.zip https://releases.hashicorp.com/terraform/0.13.4/terraform_0.13.4_linux_amd64.zip
-# We need unzip to download terraform
-RUN dnf install -y unzip
-RUN cd /home/terraform/bin && unzip /tmp/terraform.zip
-RUN dnf remove -y unzip
-RUN chown -R terraform:terraform /home/terraform/.ssh /home/terraform/bin /home/terraform/terraform_scratch
-RUN chmod 700 /home/terraform/.ssh /home/terraform/bin /home/terraform/terraform_scratch
+RUN \
+    # Create postgres user
+    groupadd -g 26 postgres && \
+    useradd -u 26 -g postgres -d /var/lib/pgsql -s /sbin/nologin postgres && \
+    mkdir -p /var/lib/pgsql/data && \
+    # Create terraform user
+    groupadd -g 1001 terraform && \
+    useradd -u 1001 -g terraform -d /home/terraform -s /usr/bin/bash terraform && \
+    mkdir /home/terraform/.ssh /home/terraform/bin /home/terraform/terraform_scratch && \
+    curl -o /tmp/terraform.zip https://releases.hashicorp.com/terraform/0.13.4/terraform_0.13.4_linux_amd64.zip && \
+    # We need unzip to download terraform
+    dnf install -y unzip && \
+    cd /home/terraform/bin && unzip /tmp/terraform.zip && \
+    dnf remove -y unzip && \
+    chown -R terraform:terraform /home/terraform/.ssh /home/terraform/bin /home/terraform/terraform_scratch && \
+    chmod 700 /home/terraform/.ssh /home/terraform/bin /home/terraform/terraform_scratch && \
+    # Setup the MS repo for azure-cli
+    rpm --import https://packages.microsoft.com/keys/microsoft.asc && \
+    # Install software
+    dnf -y --setopt=tsflags=nodocs install postgresql-server postgresql-contrib openssh-server git azure-cli sudo && \
+    dnf -y clean all && \
+    # Generate the required SSHD keys
+    ssh-keygen -A
 
-# Install terraform SSH key
-COPY authorized_keys /home/terraform/.ssh/authorized_keys
-RUN chmod 600 /home/terraform/.ssh/authorized_keys && chown terraform:terraform /home/terraform/.ssh/authorized_keys
-
-# Setup the MS repo for azure-cli
-RUN rpm --import https://packages.microsoft.com/keys/microsoft.asc
-COPY azure-cli.repo /etc/yum.repos.d/azure-cli.repo
-
-# Install software
-RUN dnf -y --setopt=tsflags=nodocs install postgresql-server postgresql-contrib openssh-server git azure-cli sudo
-RUN dnf -y clean all
-
-# Generate the required SSHD keys
-RUN ssh-keygen -A
+# Install terraform SSH key (this has to be done after the terraform user is created)
+COPY --chown=terraform:terraform authorized_keys /home/terraform/.ssh/authorized_keys
 
 # Prep exec time script
 COPY run.sh /run.sh
