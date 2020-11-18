@@ -8,22 +8,26 @@ export TF_DB_INIT_FILE=/var/lib/pgsql/data/tf_created
 if [ ! -f ${DB_INIT_FILE} ]
 then
   echo "Initializing DB"
-  initdb -D /var/lib/pgsql/data
+  initdb -D /var/lib/pgsql/data && touch ${DB_INIT_FILE}
+fi
+
+if [ ! -f /var/lib/pgsql/data/pg_hba.conf ]
+then
   echo "Create pg_hba.conf"
   echo "local   all             all                                     trust" > /var/lib/pgsql/data/pg_hba.conf
-  touch ${DB_INIT_FILE}
 fi
 
 # start postgres deamon
 echo "Starting pgsql"
 /usr/bin/postmaster -D /var/lib/pgsql/data &
+# Give postgres a couple seconds to actually start
+sleep 5
 
 # Create the terraform_backend database
 if [ ! -f ${TF_DB_INIT_FILE} ]
 then
   echo "Creating Terraform DB"
-  /usr/bin/createdb terraform_backend --user=postgres
-  touch ${TF_DB_INIT_FILE}
+  /usr/bin/createdb terraform_backend --user=postgres && touch ${TF_DB_INIT_FILE}
 fi
 
 # Initialize terraform
