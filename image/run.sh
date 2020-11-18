@@ -7,6 +7,8 @@ export TF_DB_INIT_FILE=/var/lib/pgsql/data/tf_created
 # Check to see if this is the first time we have run, and set up the DB if necessary
 if [ ! -f ${DB_INIT_FILE} ]
 then
+  sudo /usr/bin/chown postgres.0 /var/lib/pgsql
+  sudo /usr/bin/chown terraform.0 /home/terraform/terraform_scratch
   echo "Initializing DB"
   initdb -D /var/lib/pgsql/data && touch ${DB_INIT_FILE}
 fi

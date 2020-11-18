@@ -8,6 +8,7 @@ RUN \
     groupadd -g 26 postgres && \
     useradd -u 26 -g postgres -d /var/lib/pgsql -s /sbin/nologin postgres && \
     mkdir -p /var/lib/pgsql/data && \
+    chown -R postgres:postgres /var/lib/pgsql
     # Create terraform user
     groupadd -g 1001 terraform && \
     useradd -u 1001 -g terraform -d /home/terraform -s /usr/bin/bash terraform && \
