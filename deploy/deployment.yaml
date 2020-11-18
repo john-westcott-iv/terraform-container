@@ -19,6 +19,9 @@ spec:
         app: terraform-executor
       name: terraform-executor
     spec:
+      securityContext:
+        runAsUser: 26
+        fsGroup: 26
       initContainers: []
       containers: 
       - image: 'image-registry.openshift-image-registry.svc:5000/tower-terraform-demo/terraform-executor:latest'
@@ -33,8 +36,6 @@ spec:
           mountPath: /var/lib/pgsql
         - name: terraform-scratch-volume
           mountPath: /home/terraform/terraform_scratch
-        securityContext:
-          privileged: true
         resources:
           limits:
             memory: "512Mi"
