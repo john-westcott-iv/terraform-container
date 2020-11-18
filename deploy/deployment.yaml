@@ -1,3 +1,20 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: terraform-executor
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: edit
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: edit
+subjects:
+- kind: ServiceAccount
+  name: terraform-executor
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -22,6 +39,7 @@ spec:
       securityContext:
         runAsUser: 26
         fsGroup: 26
+      serviceAccount: terraform-executor
       initContainers: []
       containers: 
       - image: 'image-registry.openshift-image-registry.svc:5000/tower-terraform-demo/terraform-executor:latest'
@@ -46,6 +64,8 @@ spec:
       terminationGracePeriodSeconds: 75
       volumes:
       - name: postgresql-volume
-        emptyDir: {}
+        persistentVolumeClaim:
+          claimName: tower-terraform-demo-executor-postgresql
       - name: terraform-scratch-volume
-        emptyDir: {}
+        persistentVolumeClaim: 
+          claimName: tower-terraform-demo-executor-postgresql
