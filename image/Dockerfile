@@ -30,9 +30,10 @@ RUN \
 # Install terraform SSH key (this has to be done after the terraform user is created)
 COPY --chown=terraform:terraform authorized_keys /home/terraform/.ssh/authorized_keys
 
-# Prep exec time script
+# Prep terraform_init.sh and exec time scripts
+COPY terraform_init.sh /terraform_init.sh
 COPY run.sh /run.sh
-RUN chmod 555 /run.sh
+RUN chmod 555 /run.sh /terraform_init.sh
 
 # Install sudoers
 COPY sudoers_postgres /etc/sudoers.d/postgres

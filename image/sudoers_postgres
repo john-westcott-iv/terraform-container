@@ -1,1 +1,2 @@
-postgres ALL=(ALL) NOPASSWD: /usr/sbin/sshd -D
+postgres ALL=(ALL) NOPASSWD: /usr/sbin/sshd -D, /terraform_init.sh
+postgres ALL=(terraform) NOPASSWD: /bin/bash
