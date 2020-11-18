@@ -15,6 +15,30 @@ subjects:
 - kind: ServiceAccount
   name: terraform-executor
 ---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  annotations: {}
+  name: tower-terraform-demo-executor-postgresql
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  annotations: {}
+  name: tower-terraform-demo-executor-terraform
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -68,4 +92,4 @@ spec:
           claimName: tower-terraform-demo-executor-postgresql
       - name: terraform-scratch-volume
         persistentVolumeClaim: 
-          claimName: tower-terraform-demo-executor-postgresql
+          claimName: tower-terraform-demo-executor-terraform
