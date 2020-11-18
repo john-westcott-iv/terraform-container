@@ -21,7 +21,7 @@ spec:
     spec:
       initContainers: []
       containers: 
-      - image: 'default-route-openshift-image-registry.apps-crc.testing/tower-terraform-demo/terraform-executor:latest'
+      - image: 'image-registry.openshift-image-registry.svc:5000/tower-terraform-demo/terraform-executor:latest'
         imagePullPolicy: Always
         name: terraform-executor
         ports:
@@ -33,6 +33,8 @@ spec:
           mountPath: /var/lib/pgsql
         - name: terraform-scratch-volume
           mountPath: /home/terraform/terraform_scratch
+        securityContext:
+          privileged: true
         resources:
           limits:
             memory: "512Mi"
