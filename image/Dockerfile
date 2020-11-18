@@ -2,8 +2,6 @@ FROM centos:8
 
 # Install the MS repo file
 COPY azure-cli.repo /etc/yum.repos.d/azure-cli.repo
-# Install sudoers
-COPY sudoers_postgres /etc/sudoers.d/postgres
 
 RUN \
     # Create postgres user
@@ -35,6 +33,9 @@ COPY --chown=terraform:terraform authorized_keys /home/terraform/.ssh/authorized
 # Prep exec time script
 COPY run.sh /run.sh
 RUN chmod 555 /run.sh
+
+# Install sudoers
+COPY sudoers_postgres /etc/sudoers.d/postgres
 
 # Expose port 22 and setup the two persistent volumes
 EXPOSE 22
